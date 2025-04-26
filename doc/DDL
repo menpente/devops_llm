@@ -1,0 +1,17 @@
+CREATE TABLE synthetic_data (
+    change_failure_rate FLOAT,
+    cycle_time_in_days FLOAT,
+    date DATE,
+    developer_satisfaction_agree_count SMALLINT,
+    developer_satisfaction_disagree_count SMALLINT,
+    developer_satisfaction_neutral_count SMALLINT,
+    flow_efficiency FLOAT,
+    lead_time_in_days FLOAT,
+    prod_deployments_failed_count SMALLINT,
+    prod_deployments_success_count SMALLINT,
+    through_put FLOAT,
+    time_to_restore_in_hours FLOAT,
+    total_developer_satisfaction SMALLINT,
+    total_incidents_resolved SMALLINT,
+    team_lead VARCHAR(255)
+);

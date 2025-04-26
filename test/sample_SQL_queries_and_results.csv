@@ -1,0 +1,49 @@
+query,result
+SELECT COUNT(*) FROM devops_synthetic_data;,28783
+SELECT AVG(cycle_time_in_days) FROM devops_synthetic_data;,50.016000690608195
+"SELECT MIN(flow_efficiency), MAX(flow_efficiency), AVG(flow_efficiency) FROM devops_synthetic_data;","count    28783.000000
+mean         3.507833
+std          4.913706
+min         -0.030000
+25%         -0.030000
+50%          0.631790
+75%          5.998042
+max         34.986228
+Name: Flow Efficiency, dtype: float64"
+SELECT COUNT(DISTINCT team_lead) FROM devops_synthetic_data;,995
+"SELECT team_lead, AVG(prod_deployments_success_count) FROM devops_synthetic_data GROUP BY team_lead LIMIT 5;","         team_lead  prod_deployments_success_count
+0           abrown                        2.076923
+1  acostachristian                        2.200000
+2     acostaregina                        2.583333
+3     acostarhonda                        1.600000
+4         adamsamy                        2.666667"
+SELECT COUNT(*) FROM devops_synthetic_data WHERE cycle_time_in_days > 1000;,0
+"SELECT EXTRACT(MONTH FROM date), AVG(time_to_restore_in_hours) FROM devops_synthetic_data GROUP BY 1;","   month  time_to_restore_in_hours
+0      1                194.424504
+1      2                122.130248
+2      3                189.343260
+3      4                125.478747"
+"SELECT team_lead, AVG(through_put) FROM devops_synthetic_data GROUP BY team_lead ORDER BY 2 DESC LIMIT 5;","     team_lead  through_put
+0      katie32    14.292159
+1  georgeweber    13.260905
+2     kjackson    12.385331
+3  susanrogers    12.135185
+4      qzavala    12.117471"
+"SELECT column_name, COUNT(*) FROM devops_synthetic_data WHERE column IS NULL GROUP BY column_name;","change_failure_rate                      18451
+cycle_time_in_days                        6435
+date                                         0
+developer_satisfaction_agree_count       28408
+developer_satisfaction_disagree_count    28408
+developer_satisfaction_neutral_count     28408
+Flow Efficiency                              0
+lead_time_in_days                         6435
+prod_deployments_failed_count            18451
+prod_deployments_success_count           18451
+through_put                               6435
+time_to_restore_in_hours                 28726
+total_developer_satisfaction                 0
+total_incidents_resolved                 28726
+team_lead                                    0
+month                                        0
+dtype: int64"
+SELECT AVG(lead_time_in_days) FROM devops_synthetic_data WHERE prod_deployments_failed_count = 0;,130.88666115530128

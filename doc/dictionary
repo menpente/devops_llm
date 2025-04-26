@@ -1,0 +1,16 @@
+Column Name | Data Type | Description
+change_failure_rate | FLOAT | Percentage rate of deployment changes that caused failures (0 to 1 scale).
+cycle_time_in_days | FLOAT | Time (in days) taken for work items to complete their lifecycle.
+date | DATE | Date associated with the record (within 2025 range).
+developer_satisfaction_agree_count | SMALLINT | Number of developers who agreed (feedback/survey).
+developer_satisfaction_disagree_count | SMALLINT | Number of developers who disagreed (feedback/survey).
+developer_satisfaction_neutral_count | SMALLINT | Number of developers who were neutral (feedback/survey).
+flow_efficiency | FLOAT | Flow efficiency metric calculated for work items (can have wide variance).
+lead_time_in_days | FLOAT | Number of days from idea to delivery for a work item.
+prod_deployments_failed_count | SMALLINT | Number of production deployments that failed.
+prod_deployments_success_count | SMALLINT | Number of production deployments that succeeded.
+through_put | FLOAT | Number of work items completed over a period.
+time_to_restore_in_hours | FLOAT | Time (in hours) taken to restore service after incidents.
+total_developer_satisfaction | SMALLINT | Aggregated score representing overall developer satisfaction.
+total_incidents_resolved | SMALLINT | Total number of incidents resolved in a given period.
+team_lead | VARCHAR(255) | Username of the team lead responsible for the work or project.
