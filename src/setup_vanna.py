@@ -18,7 +18,7 @@ def main():
     vn = MyVanna(config={'model': 'llama3'})
 
     # Connect to DuckDB
-    vn.connect_to_duckdb(url='/Users/rubendelafuente/tfm/data/dora_llm.duckdb')
+    vn.connect_to_duckdb(url='devops_data.duckdb')
 
     # Train on info schema
     df_information_schema = vn.run_sql("SELECT * FROM INFORMATION_SCHEMA.COLUMNS")
