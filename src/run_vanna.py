@@ -20,10 +20,12 @@ trace.get_tracer_provider().add_span_processor(
 # Setup file logger for traces
 logging.basicConfig(
     filename='trace.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    force=True
 
+)
+logging.info("Test log message to verify logging setup.")
 # --- SQL Error Logger ---
 def log_bad_sql(bad_sql, error_message):
     log_file = "bad_sql_log.csv"
@@ -95,7 +97,7 @@ def main():
     vn = TracedVanna(config={'model': 'llama3'})
     vn.connect_to_duckdb(url='devops_data.duckdb')
 
-    app = VannaFlaskApp(vn)
+    app = VannaFlaskApp(vn, title='LLM-powered DX Analytics', subtitle='Secure Local Conversational Analytics for Developer Experience with Vanna and Ollama')
     app.run()
 
 if __name__ == "__main__":
