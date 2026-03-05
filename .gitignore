@@ -172,3 +172,17 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Databases & vector store
+*.duckdb
+*.sqlite3
+vanna_chroma_db/
+[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]-*/
+
+# Runtime logs
+bad_sql_log.csv
+trace.log
+
+# OS & editor
+.DS_Store
+~$*

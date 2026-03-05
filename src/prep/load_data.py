@@ -1,3 +1,4 @@
+import os
 import duckdb
 import pandas as pd
 
@@ -7,7 +8,7 @@ import pandas as pd
 csv_file_path = 'data/devops_synthetic_data.csv'
 
 # Name of your DuckDB database file
-duckdb_file_path = 'devops_data.duckdb'
+duckdb_file_path = os.environ.get('DATABASE_URL', 'devops_data.duckdb')
 
 # Table name
 table_name = 'devops_synthetic_data'
@@ -17,6 +18,7 @@ table_name = 'devops_synthetic_data'
 # Step 1: Read CSV into a Pandas DataFrame
 print("Loading CSV file...")
 df = pd.read_csv(csv_file_path)
+df.columns = df.columns.str.lower().str.replace(' ', '_')
 print(f"CSV loaded successfully with {len(df)} rows.")
 
 # Step 2: Connect to (or create) DuckDB database

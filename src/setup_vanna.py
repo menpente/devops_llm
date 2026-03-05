@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from vanna.ollama import Ollama
 from vanna.chromadb import ChromaDB_VectorStore
@@ -15,10 +16,12 @@ def read_file(filepath):
         return f.read()
 
 def main():
-    vn = MyVanna(config={'model': 'llama3'})
+    db_url = os.environ.get('DATABASE_URL', 'devops_data.duckdb')
+    model = os.environ.get('OLLAMA_MODEL', 'llama3')
+    vn = MyVanna(config={'model': model})
 
     # Connect to DuckDB
-    vn.connect_to_duckdb(url='devops_data.duckdb')
+    vn.connect_to_duckdb(url=db_url)
 
     # Train on info schema
     df_information_schema = vn.run_sql("SELECT * FROM INFORMATION_SCHEMA.COLUMNS")

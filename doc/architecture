@@ -1,0 +1,99 @@
+# Architecture: devops_llm
+
+## 1. RAG Training Pipeline
+
+Vanna's retrieval-augmented generation (RAG) approach replaces fine-tuning with an indexed knowledge base that is assembled at inference time into a few-shot prompt.
+
+Four knowledge sources are ingested by `src/setup_vanna.py`:
+
+1. **INFORMATION_SCHEMA.COLUMNS** — Vanna's `get_training_plan_generic()` auto-generates a structured training plan from the live DuckDB schema. This ensures the LLM knows every column name, data type, and table relationship without manual curation.
+
+2. **doc/DDL** — The raw `CREATE TABLE` statement for `devops_synthetic_data`. Training on DDL teaches Vanna the exact column names and types in SQL syntax, complementing the schema plan.
+
+3. **doc/dictionary** — A plain-language business glossary mapping domain terms (e.g. "MTTR", "change failure rate", "flow efficiency") to their technical definitions and column names. This bridges the gap between how users ask questions and what the schema contains.
+
+4. **test/sample_SQL_queries_and_results.csv** — Curated example SQL queries. Each query is embedded and stored; at inference time, semantically similar examples are retrieved and injected into the prompt as few-shot demonstrations.
+
+All four sources are embedded via ChromaDB (`ChromaDB_VectorStore`) and persisted in `vanna_chroma_db/`. The `MyVanna` class uses Python multiple inheritance to compose `ChromaDB_VectorStore` (retrieval) and `Ollama` (LLM backend) into a single object.
+
+
+## 2. Inference Flow
+
+When a user submits a question through the Flask UI:
+
+```
+User question
+      │
+      ▼
+ChromaDB similarity search
+      │  returns top-k similar DDL, docs, and SQL examples
+      ▼
+Prompt assembly (few-shot)
+      │  system prompt + retrieved context + user question
+      ▼
+llama3 via Ollama (local HTTP API at localhost:11434)
+      │  generates a SQL query
+      ▼
+DuckDB query execution
+      │
+      ├─ success → result DataFrame returned to UI
+      └─ failure → bad_sql_log.csv + error shown in UI
+```
+
+The `VannaFlaskApp` from the `vanna` package handles the HTTP layer. No custom Flask routes are defined; all chat UI logic is provided by the library.
+
+
+## 3. Observability
+
+`TracedVanna` (in `src/run_vanna.py`) wraps `ask()` and `ask_sql()` with OpenTelemetry spans using the SDK's `TracerProvider`.
+
+**Spans captured:**
+
+| Span name | Attributes |
+|---|---|
+| `ask_question` | `user.question`, `llm.response`, `duration` |
+| `ask_sql` | `user.question`, `llm.sql`, `duration` |
+
+Spans are exported to:
+- **Console** via `ConsoleSpanExporter` (visible in the terminal running `make run`)
+- **`trace.log`** via Python's `logging` module at DEBUG level
+
+To use `trace.log` for analysis:
+```bash
+grep "ASK_SQL" trace.log       # all SQL generation events
+grep "Duration" trace.log      # latency per query
+grep "ERROR" trace.log         # any exceptions caught
+```
+
+`trace.log` is gitignored and stays local to each deployment.
+
+
+## 4. SQL Feedback Loop
+
+When `run_sql()` raises an exception, `log_bad_sql()` appends a row to `bad_sql_log.csv`:
+
+```
+bad_sql, error_message, corrected_sql, notes
+```
+
+The `corrected_sql` and `notes` columns are empty by default. To close the loop:
+
+1. Open `bad_sql_log.csv` in a spreadsheet or text editor
+2. Fill in `corrected_sql` with a working query for any row
+3. Run `make retrain`
+
+`src/train/train_corrections.py` reads the CSV, filters rows where `corrected_sql` is non-empty, and calls `vn.train(sql=corrected_sql)` for each. This adds the corrected SQL to ChromaDB so future similar questions retrieve it as a few-shot example.
+
+The feedback loop is incremental: only rows with a non-empty `corrected_sql` are processed, and the CSV is not modified — it serves as a permanent audit log of all SQL failures.
+
+
+## 5. Environment Configuration
+
+All file paths and model names are read from environment variables with sensible defaults:
+
+| Variable | Default | Used in |
+|---|---|---|
+| `DATABASE_URL` | `devops_data.duckdb` | all Python files |
+| `OLLAMA_MODEL` | `llama3` | `setup_vanna.py`, `run_vanna.py`, `app.py` |
+
+Copy `.env.example` to `.env` and source it (or use a tool like `python-dotenv`) to override defaults without touching source code.

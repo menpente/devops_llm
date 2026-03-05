@@ -1,9 +1,10 @@
+import os
 import duckdb
 
 # --- CONFIGURATION ---
 
 # Path to your DuckDB database file
-duckdb_file_path = 'devops_data.duckdb'
+duckdb_file_path = os.environ.get('DATABASE_URL', 'devops_data.duckdb')
 
 # --- MAIN SCRIPT ---
 
